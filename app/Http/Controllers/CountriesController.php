@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Country;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Yajra\DataTables\Facades\DataTables;
 
 class CountriesController extends Controller
 {
@@ -46,5 +47,17 @@ class CountriesController extends Controller
                 return response()->json(['code' => 1, 'msg' => 'New country has been successfully saved']);
             }
         }
+    }
+
+    /**
+     * get Countries Lists
+     * from database
+     *
+     * @return void
+     */
+    public function getCountriesLists()
+    {
+        $countries = Country::all();
+        return DataTables::of($countries)->addIndexColumn()->make(true);
     }
 }

@@ -24,7 +24,14 @@
                         countries
                     </div>
                     <div class="card-body">
-                        .......
+                        <table class="table table-hover table-bordered" id="countries-table">
+                            <thead>
+                                <th>#</th>
+                                <th>Country Name</th>
+                                <th>Capital city</th>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -39,12 +46,12 @@
                             <div class="form-group">
                                 <label for="">Country name</label>
                                 <input type="text" class="form-control" name="country_name" placeholder="Enter country name">
-                                <span class="text-danger error-text country_name_error"></span>
+                                <span class="text-danger error-text country_name_error mt-1"></span>
                             </div>
                             <div class="form-group">
                                 <label for="">Capital city</label>
                                 <input type="text" class="form-control" name="capital_city" placeholder="Enter Capital city">
-                                <span class="text-danger error-text capital_city_error"></span>
+                                <span class="text-danger error-text capital_city_error mt-1"></span>
                             </div>
                             <div class="form-group">
                                 <button type="submit" class="btn btn-block btn-success">SAVE</button>
@@ -66,7 +73,24 @@
 
     <script>
 
-        toastr.options.preventDuplicates = true;
+        // toastr.options.preventDuplicates = true;
+        toastr.options = {
+            "closeButton": true,
+            // "debug": false,
+            // "newestOnTop": false,
+            // "progressBar": false,
+            "positionClass": "toast-bottom-left",
+            "preventDuplicates": false,
+            // "onclick": null,
+            // "showDuration": "300",
+            // "hideDuration": "1000",
+            // "timeOut": "60000",
+            // "extendedTimeOut": "60000",
+            // "showEasing": "swing",
+            // "hideEasing": "linear",
+            // "showMethod": "fadeIn",
+            // "hideMethod": "fadeOut"
+        };
 
         $.ajaxSetup({
             headers:{
@@ -98,10 +122,26 @@
                         }else {
                             $(form)[0].reset();
                             // alert(data.msg);
+                            $('#countries-table').DataTable().ajax.reload(null, false);
                             toastr.success(data.msg);
                         }
                     }
                 });
+            });
+
+            // Get All Countries Lists
+            $('#countries-table').DataTable({
+                processing: true,
+                info:true,
+                ajax:"{{ route('get.countries.lists') }}",
+                'pageLength': 5,
+                'aLengthMenu': [[5,10,25,50,-1],[5,10,25,50,'All']],
+                columns: [
+                    // {data:'id',name:'id'},
+                    {data:'DT_RowIndex',name:'DT_RowIndex'},
+                    {data:'country_name',name:'country_name'},
+                    {data:'capital_city',name:'capital_city'},
+                ]
             });
 
         });

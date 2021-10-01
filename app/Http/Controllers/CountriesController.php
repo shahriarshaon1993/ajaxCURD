@@ -65,7 +65,10 @@ class CountriesController extends Controller
                             <button class="btn btn-sm btn-danger" data-id="' . $row['id'] . '" id="deleteCountryBtn">Delete</button>
                         </div>';
             })
-            ->rawColumns(['actions'])
+            ->addColumn('checkbox', function ($row) {
+                return '<input type="checkbox" name="country_checkbox" data-id="' . $row['id'] . '"><lable></lable>';
+            })
+            ->rawColumns(['actions', 'checkbox'])
             ->make(true);
     }
 
@@ -128,5 +131,18 @@ class CountriesController extends Controller
         } else {
             return response()->json(['code' => 0, 'msg' => 'Something went wrong']);
         }
+    }
+
+    /**
+     * delete Selected Countries items
+     *
+     * @param  mixed $request
+     * @return void
+     */
+    public function deleteSelectedCountries(Request $request)
+    {
+        $country_ids = $request->countries_ids;
+        Country::whereIn('id', $country_ids)->delete();
+        return response()->json(['code' => 1, 'msg' => 'Countries have been deleted from database']);
     }
 }

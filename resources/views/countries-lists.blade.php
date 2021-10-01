@@ -26,10 +26,19 @@
                     <div class="card-body">
                         <table class="table table-hover table-bordered" id="countries-table">
                             <thead>
+                                <th>
+                                    <input type="checkbox" name="main_checkbox" id="">
+                                    <label></label>
+                                </th>
                                 <th>#</th>
                                 <th>Country Name</th>
                                 <th>Capital city</th>
-                                <th>Actions</th>
+                                <th>
+                                    Actions 
+                                    <button class="btn btn-sm btn-danger d-none" id="deleteAllBtn">
+                                        Delete all
+                                    </button>
+                                </th>
                             </thead>
                             <tbody></tbody>
                         </table>
@@ -141,10 +150,11 @@
                 'aLengthMenu': [[5,10,25,50,-1],[5,10,25,50,'All']],
                 columns: [
                     // {data:'id',name:'id'},
+                    {data:'checkbox', name:'checkbox', orderable:false, searchable:false},
                     {data:'DT_RowIndex',name:'DT_RowIndex'},
                     {data:'country_name',name:'country_name'},
                     {data:'capital_city',name:'capital_city'},
-                    {data:'actions',name:'actions'},
+                    {data:'actions',name:'actions', orderable:false, searchable:false},
                 ]
             });
 
@@ -220,6 +230,70 @@
                         }, 'json');
                     }
                 });
+            });
+
+            // For checkbox
+            $(document).on('click','input[name="main_checkbox"]', function(){
+                if(this.checked){
+                    $('input[name="country_checkbox"]').each(function(){
+                        this.checked = true;
+                    });
+                }else{
+                    $('input[name="country_checkbox"]').each(function(){
+                        this.checked = false;
+                    });
+                }
+                toggledeleteAllBtn();
+            });
+
+            // all checkbox check 
+            $(document).on('change','input[name="country_checkbox"]', function(){
+                if( $('input[name="country_checkbox"]').length == $('input[name="country_checkbox"]:checked').length ){
+                    $('input[name="main_checkbox"]').prop('checked', true);
+                }else{
+                   $('input[name="main_checkbox"]').prop('checked', false);
+                }
+                toggledeleteAllBtn();
+            });
+
+            // All countries delete options
+            function toggledeleteAllBtn(){
+                if( $('input[name="country_checkbox"]:checked').length > 0 ){
+                    $('button#deleteAllBtn').text('Delete ('+$('input[name="country_checkbox"]:checked').length+')').removeClass('d-none');
+                }else{
+                   $('button#deleteAllBtn').addClass('d-none');
+                }
+            }
+
+            $(document).on('click','button#deleteAllBtn', function(){
+                var checkedCountries = [];
+                $('input[name="country_checkbox"]:checked').each(function(){
+                    checkedCountries.push($(this).data('id'));
+                });
+                var url = '{{ route("delete.selected.countries") }}';
+                if(checkedCountries.length > 0){
+                    swal.fire({
+                        title:'Are you sure?',
+                        html:'You want to delete <b>('+checkedCountries.length+')</b> countries',
+                        showCancelButton:true,
+                        showCloseButton:true,
+                        confirmButtonText:'Yes, Delete',
+                        cancelButtonText:'Cancel',
+                        confirmButtonColor:'#556ee6',
+                        cancelButtonColor:'#d33',
+                        width:300,
+                        allowOutsideClick:false
+                    }).then(function(result){
+                        if(result.value){
+                            $.post(url,{countries_ids:checkedCountries},function(data){
+                                if(data.code == 1){
+                                    $('#countries-table').DataTable().ajax.reload(null, false);
+                                    toastr.success(data.msg);
+                                }
+                            },'json');
+                        }
+                    })
+                }
             });
 
         });

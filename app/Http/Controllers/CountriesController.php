@@ -62,7 +62,7 @@ class CountriesController extends Controller
             ->addColumn('actions', function ($row) {
                 return '<div class = "btn-group">
                             <button class="btn btn-sm btn-info" data-id="' . $row['id'] . '" id="editCountryBtn">Update</button>
-                            <button class="btn btn-sm btn-danger">Delete</button>
+                            <button class="btn btn-sm btn-danger" data-id="' . $row['id'] . '" id="deleteCountryBtn">Delete</button>
                         </div>';
             })
             ->rawColumns(['actions'])
@@ -109,6 +109,24 @@ class CountriesController extends Controller
             } else {
                 return response()->json(['code' => 0, 'msg' => 'Something went wrong']);
             }
+        }
+    }
+
+    /**
+     * delete Country
+     *
+     * @param  mixed $request
+     * @return void
+     */
+    public function deleteCountry(Request $request)
+    {
+        $country_id = $request->country_id;
+        $query = Country::find($country_id)->delete();
+
+        if ($query) {
+            return response()->json(['code' => 1, 'msg' => 'Country has been deleted from database']);
+        } else {
+            return response()->json(['code' => 0, 'msg' => 'Something went wrong']);
         }
     }
 }

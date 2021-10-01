@@ -192,6 +192,36 @@
                 });
             });
 
+            // Delete country records
+            $(document).on('click', '#deleteCountryBtn', function() {
+                var country_id = $(this).data('id');
+                var url = '<?= route("delete.country") ?>';
+
+                swal.fire({
+                    title: 'Are you sure',
+                    html: 'You want to <b>delete</b> this country',
+                    showCancelButton: true,
+                    showCloseButton: true,
+                    cancelButtonText: 'Cancel',
+                    confirmButtonText: 'Yes, delete',
+                    cancelButtonColor: '#d33',
+                    confirmButtonColor: '#556ee6',
+                    width: 300,
+                    allowOutsideClick: false,
+                }).then(function (result) {
+                    if(result.value) {
+                        $.post(url, {country_id:country_id}, function(data) {
+                            if(data.code == 1) {
+                                $('#countries-table').DataTable().ajax.reload(null, false);
+                                toastr.success(data.msg);
+                            }else {
+                                toastr.error(data.msg);
+                            }
+                        }, 'json');
+                    }
+                });
+            });
+
         });
 
     </script>

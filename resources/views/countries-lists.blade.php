@@ -29,6 +29,7 @@
                                 <th>#</th>
                                 <th>Country Name</th>
                                 <th>Capital city</th>
+                                <th>Actions</th>
                             </thead>
                             <tbody></tbody>
                         </table>
@@ -62,6 +63,8 @@
             </div>
         </div>
     </div>
+
+    @include('edit-country-modal')
 
     <script src="{{ asset('assets/jquery/jQuery.js') }}"></script>
     <script src="{{ asset('assets/bootstrap/js/bootstrap.min.js') }}"></script>
@@ -141,7 +144,52 @@
                     {data:'DT_RowIndex',name:'DT_RowIndex'},
                     {data:'country_name',name:'country_name'},
                     {data:'capital_city',name:'capital_city'},
+                    {data:'actions',name:'actions'},
                 ]
+            });
+
+            // Show modal for update country form
+            $(document).on('click', '#editCountryBtn', function() {
+                var country_id = $(this).data('id');
+                $('.editCountry').find('form')[0].reset();
+                $('.editCountry').find('span.error-text').text('');
+
+                $.post('<?= route('get.countries.details') ?>', { country_id:country_id }, function(data) {
+                    // alert(data.details.country_name);
+                    $('.editCountry').find('input[name="cid"]').val(data.details.id);
+                    $('.editCountry').find('input[name="country_name"]').val(data.details.country_name);
+                    $('.editCountry').find('input[name="capital_city"]').val(data.details.capital_city);
+                    $('.editCountry').modal('show');
+                },'json');
+            });
+
+            //Update country details
+            $('#update-country-form').on('submit', function(e) {
+                e.preventDefault();
+                var form = this;
+                $.ajax({
+                    url: $(form).attr('action'),
+                    method: $(form).attr('method'),
+                    data: new FormData(form),
+                    processData: false,
+                    dataType: 'json',
+                    contentType: false,
+                    beforeSend: function() {
+                        $(form).find('span.error-text').text('');
+                    },
+                    success: function(data) {
+                        if(data.code == 0) {
+                            $.each(data.error, function(prefix, val) {
+                                $(form).find('span.'+prefix+'_error').text(val[0]);
+                            });
+                        }else {
+                            $('#countries-table').DataTable().ajax.reload(null, false);
+                            $('.editCountry').modal('hide');
+                            $('.editCountry').find(form)[0].reset();
+                            toastr.success(data.msg);
+                        }
+                    },
+                });
             });
 
         });
